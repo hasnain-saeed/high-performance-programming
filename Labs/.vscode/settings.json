@@ -1,0 +1,9 @@
+{
+    "files.associations": {
+        "*.js": "javascriptreact",
+        "queue": "c",
+        "stack": "c",
+        "stdlib.h": "c",
+        "string.h": "c"
+    }
+}

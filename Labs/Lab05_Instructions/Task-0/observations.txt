@@ -1,0 +1,77 @@
+Analysis of time Command Output for Different Programs
+
+The time command measures real, user, and system time, giving insight into how different execution patterns impact performance.
+
+Key Metrics
+	•	Real time (real) → Actual elapsed time (wall-clock time).
+	•	User time (user) → CPU time spent executing user-space code.
+	•	System time (sys) → CPU time spent executing system calls (e.g., malloc(), sleep()).
+
+1️⃣ regularcode (Single-threaded Computation)
+
+real	0m2.683s
+user	0m2.671s
+sys	0m0.018s
+
+✅ Observations:
+	•	user ≈ real → Almost all time is spent on computation.
+	•	sys is minimal → Few system calls.
+
+💡 Conclusion:
+This program is a pure CPU-bound computation, where execution time is dictated by processing speed.
+
+2️⃣ mallocycode (Memory Allocation Heavy)
+
+real	0m3.687s
+user	0m3.201s
+sys	0m0.492s
+
+✅ Observations:
+	•	Higher sys time (0.492s vs 0.018s in regularcode) → More system calls due to dynamic memory allocations (malloc(), free()).
+	•	Increased real time → Memory allocations might introduce cache misses, page faults, or slow memory management.
+
+💡 Conclusion:
+The performance overhead comes from frequent memory allocations, causing more kernel interactions (syscalls) and memory management overhead.
+
+3️⃣ sleepycode (Calls sleep())
+
+real	0m7.699s
+user	0m2.684s
+sys	0m0.014s
+
+✅ Observations:
+	•	real time is much higher (7.699s vs user=2.684s) → Due to explicit sleep() calls.
+	•	Low sys time → sleep() is a lightweight system call.
+
+💡 Conclusion:
+The program pauses execution intentionally. During sleep(), the CPU is idle, and the process is not consuming CPU cycles, explaining the large gap between real and user time.
+
+4️⃣ threadedcode (Multithreaded Computation)
+
+real	0m2.683s
+user	0m5.342s
+sys	0m0.005s
+
+✅ Observations:
+	•	user time is nearly doubled (5.342s) compared to real (2.683s) → This suggests two threads are running in parallel.
+	•	real time is similar to regularcode → Parallel execution speeds up the program.
+
+💡 Conclusion:
+	•	The work is being split across two CPU cores.
+	•	Since multiple threads run simultaneously, total CPU usage (user) is higher, but the wall-clock (real) time remains low.
+
+Final Takeaways
+
+Code	real (Wall-Clock)	user (CPU Computation)	sys (Kernel/System Calls)	Behavior
+regularcode	2.683s	2.671s	0.018s	CPU-bound single-threaded computation
+mallocycode	3.687s	3.201s	0.492s	Heavy memory allocations (increased sys time)
+sleepycode	7.699s	2.684s	0.014s	Calls sleep(), causing idle time
+threadedcode	2.683s	5.342s	0.005s	Multithreading utilizes multiple CPU cores
+
+🚀 Insights
+	•	regularcode is CPU-bound and efficient.
+	•	mallocycode suffers from memory allocation overhead.
+	•	sleepycode has a long real time due to forced delays.
+	•	threadedcode effectively uses multiple CPU cores.
+
+Would you like a graphical visualization of the CPU time distribution? 🚀

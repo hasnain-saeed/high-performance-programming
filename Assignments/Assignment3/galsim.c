@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include "graphics/graphics.h"
 
 typedef struct Particle
 {
@@ -11,6 +12,16 @@ typedef struct Particle
     double vel_dy;
     double b_diff;
 } particle_t;
+
+const float circleRadius=0.005, circleColor=0, L=1, W=1;;
+const int windowWidth=800;
+
+void keep_within_box(double* xA, double* yA) {
+  if(*xA > 1)
+    *xA = 0;
+  if(*yA > 1)
+    *yA = 0;
+}
 
 int read_doubles_from_file(int n, double* p, const char* fileName) {
   /* Open input file and determine its size. */
@@ -127,25 +138,45 @@ int main(int argc, const char* argv[]) {
         particles[i].vel_dy = buffer[i*6+4];
         particles[i].b_diff = buffer[i*6+5];
     }
+    if (graphics == 1){
+        InitializeGraphics((char*)argv[0],windowWidth,windowWidth);
+        SetCAxes(0,1);
 
-    printf("First particle initial state:\n");
-    printf("  pos_dx = %.2f\n", particles[0].pos_dx);
-    printf("  pos_dy = %.2f\n", particles[0].pos_dy);
-    printf("  vel_dx = %.2f\n", particles[0].vel_dx);
-    printf("  vel_dy = %.2f\n", particles[0].vel_dy);
-    printf("  mass = %.2f\n", particles[0].m_diff);
-    printf("  brightness = %.2f\n", particles[0].b_diff);
+        printf("Hit q to quit.\n");
+        while(!CheckForQuit()) {
+            /* Call graphics routines. */
+            ClearScreen();
+            for (size_t i = 0; i < N; i++){
+                DrawCircle(particles[i].pos_dx, particles[i].pos_dy, L, W, circleRadius, circleColor);
+            }
+            Refresh();
+            calculateParticleMotion(particles, N, nsteps, delta_t);
+            /* Sleep a short while to avoid screen flickering. */
+            usleep(3000);
+        }
+        FlushDisplay();
+        CloseDisplay();
+    }
 
-    calculateParticleMotion(particles, N, nsteps, delta_t);
-    printf("Graphics: %d\n", graphics);
+    // printf("First particle initial state:\n");
+    // printf("  pos_dx = %.2f\n", particles[0].pos_dx);
+    // printf("  pos_dy = %.2f\n", particles[0].pos_dy);
+    // printf("  vel_dx = %.2f\n", particles[0].vel_dx);
+    // printf("  vel_dy = %.2f\n", particles[0].vel_dy);
+    // printf("  mass = %.2f\n", particles[0].m_diff);
+    // printf("  brightness = %.2f\n", particles[0].b_diff);
 
-    printf("\nFirst particle final state:\n");
-    printf("  pos_dx = %.2f\n", particles[0].pos_dx);
-    printf("  pos_dy = %.2f\n", particles[0].pos_dy);
-    printf("  vel_dx = %.2f\n", particles[0].vel_dx);
-    printf("  vel_dy = %.2f\n", particles[0].vel_dy);
-    printf("  mass = %.2f\n", particles[0].m_diff);
-    printf("  brightness = %.2f\n", particles[0].b_diff);
+
+
+    // printf("Graphics: %d\n", graphics);
+
+    // printf("\nFirst particle final state:\n");
+    // printf("  pos_dx = %.2f\n", particles[0].pos_dx);
+    // printf("  pos_dy = %.2f\n", particles[0].pos_dy);
+    // printf("  vel_dx = %.2f\n", particles[0].vel_dx);
+    // printf("  vel_dy = %.2f\n", particles[0].vel_dy);
+    // printf("  mass = %.2f\n", particles[0].m_diff);
+    // printf("  brightness = %.2f\n", particles[0].b_diff);
 
     for (size_t i = 0; i < N; i++){
         buffer[i*6+0] = particles[i].pos_dx;

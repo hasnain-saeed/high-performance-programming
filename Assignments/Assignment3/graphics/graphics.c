@@ -9,7 +9,7 @@
  * CME212 Assignment 5
  * Oliver Fringer
  * Stanford University
- * 
+ *
  * $Id: graphics.c,v 1.2 2005/03/01 04:09:13 fringer Exp fringer $
  * $Log: graphics.c,v $
  * Revision 1.2  2005/03/01 04:09:13  fringer
@@ -162,7 +162,7 @@ void InitializeGraphics(char *command, int windowWidth, int windowHeight) {
     color.red=((double)(NUMCOLORS-i)/(double)NUMCOLORS)*0xFFFF;
     color.blue=color.red;
     color.green=color.red;
-    XAllocColor(global_display_ptr, screen_colormap,&color);    
+    XAllocColor(global_display_ptr, screen_colormap,&color);
     colors[i]=color.pixel;
   }
   SetCAxes(0,1);

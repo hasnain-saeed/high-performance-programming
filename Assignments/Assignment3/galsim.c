@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <sys/time.h>
 #include "graphics/graphics.h"
 
 typedef struct Particle
@@ -13,8 +14,15 @@ typedef struct Particle
     double b_diff;
 } particle_t;
 
-const float circleRadius=0.005, circleColor=0, L=1, W=1;;
+const float epsilon = 1e-3, circleRadius=0.005, circleColor=0, L=1, W=1;
 const int windowWidth=800;
+
+static double get_wall_seconds() {
+  struct timeval tv;
+  gettimeofday(&tv, NULL);
+  double seconds = tv.tv_sec + (double)tv.tv_usec / 1000000;
+  return seconds;
+}
 
 void keep_within_box(double* xA, double* yA) {
   if(*xA > 1)
@@ -77,14 +85,13 @@ int write_doubles_to_file(int n, double* p, const char* fileName) {
 }
 
 void calculateParticleMotion(particle_t* particles, int N, int nsteps, float delta_t){
-    float epsilon = 1e-3;
     float G = -100/N;
     double Gm, rij, rij_x, rij_y,factor, Fx, Fy, ax, ay;
-    for (size_t i = 0; i < nsteps; i++){
-        for (size_t i = 0; i < N; i++){
+    for (int k = 0; k < nsteps; k++){
+        for (int i = 0; i < N; i++){
             Gm = G * particles[i].m_diff;
             Fx = 0,Fy = 0;
-            for (size_t j = 0; j < N; j++){
+            for (int j = 0; j < N; j++){
                 if (i==j) continue;
                 rij_x = particles[i].pos_dx - particles[j].pos_dx;
                 rij_y = particles[i].pos_dy - particles[j].pos_dy;
@@ -93,10 +100,8 @@ void calculateParticleMotion(particle_t* particles, int N, int nsteps, float del
                 Fx += rij_x*factor;
                 Fy += rij_y*factor;
             }
-            Fx *= Gm;
-            Fy *= Gm;
-            ax = Fx/particles[i].m_diff;
-            ay = Fy/particles[i].m_diff;
+            ax = Fx*Gm/particles[i].m_diff;
+            ay = Fy*Gm/particles[i].m_diff;
             particles[i].vel_dx += delta_t*ax;
             particles[i].vel_dy += delta_t*ay;
             particles[i].pos_dx += delta_t*particles[i].vel_dx;
@@ -138,6 +143,7 @@ int main(int argc, const char* argv[]) {
         particles[i].vel_dy = buffer[i*6+4];
         particles[i].b_diff = buffer[i*6+5];
     }
+
     if (graphics == 1){
         InitializeGraphics((char*)argv[0],windowWidth,windowWidth);
         SetCAxes(0,1);
@@ -157,26 +163,11 @@ int main(int argc, const char* argv[]) {
         FlushDisplay();
         CloseDisplay();
     }
+    double startTime = get_wall_seconds();
+    calculateParticleMotion(particles, N, nsteps, delta_t);
+    double secondsTaken = get_wall_seconds() - startTime;
+    printf("secondsTaken = %f\n", secondsTaken);
 
-    // printf("First particle initial state:\n");
-    // printf("  pos_dx = %.2f\n", particles[0].pos_dx);
-    // printf("  pos_dy = %.2f\n", particles[0].pos_dy);
-    // printf("  vel_dx = %.2f\n", particles[0].vel_dx);
-    // printf("  vel_dy = %.2f\n", particles[0].vel_dy);
-    // printf("  mass = %.2f\n", particles[0].m_diff);
-    // printf("  brightness = %.2f\n", particles[0].b_diff);
-
-
-
-    // printf("Graphics: %d\n", graphics);
-
-    // printf("\nFirst particle final state:\n");
-    // printf("  pos_dx = %.2f\n", particles[0].pos_dx);
-    // printf("  pos_dy = %.2f\n", particles[0].pos_dy);
-    // printf("  vel_dx = %.2f\n", particles[0].vel_dx);
-    // printf("  vel_dy = %.2f\n", particles[0].vel_dy);
-    // printf("  mass = %.2f\n", particles[0].m_diff);
-    // printf("  brightness = %.2f\n", particles[0].b_diff);
 
     for (size_t i = 0; i < N; i++){
         buffer[i*6+0] = particles[i].pos_dx;
@@ -187,8 +178,8 @@ int main(int argc, const char* argv[]) {
         buffer[i*6+5] = particles[i].b_diff;
     }
 
-    if(write_doubles_to_file(6*N, buffer, "ellipse_n_200steps.gal")!= 0){
-        printf("Error reading file: ");
+    if(write_doubles_to_file(6*N, buffer, "result.gal")!= 0){
+        printf("Error writing file '%s'\n", "result.gal");
     }
     free(particles);
     return 0;

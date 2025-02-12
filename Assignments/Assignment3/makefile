@@ -3,7 +3,7 @@ LD = gcc
 INCLUDES = -I/opt/X11/include
 LIBS = -L/opt/X11/lib -lX11 -lm
 CFLAGS = -O3 -Wall -Werror $(INCLUDES)
-CFLAGS_DEBUG = -g -Wall -Werror -O0 $(INCLUDES)
+CFLAGS_DEBUG = -g $(INCLUDES)
 LDFLAGS = $(LIBS)
 RM = /bin/rm -f
 OBJS = galsim.o graphics/graphics.o
@@ -11,7 +11,6 @@ EXECUTABLE = galsim
 EXECUTABLE_DEBUG = galsim_debug
 
 all: $(EXECUTABLE)
-
 debug: CFLAGS = $(CFLAGS_DEBUG)
 debug: $(EXECUTABLE_DEBUG)
 

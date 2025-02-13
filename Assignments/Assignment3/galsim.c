@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <string.h>
 #include <sys/time.h>
 #include "graphics/graphics.h"
 
@@ -14,7 +15,7 @@ typedef struct Particle
     double b_diff;
 } particle_t;
 
-const float epsilon = 1e-3, circleRadius=0.005, circleColor=0, L=1, W=1;
+const float epsilon = 1e-3, circleRadius=0.004, circleColor=0, L=1, W=1;
 const int windowWidth=800;
 
 static double get_wall_seconds() {
@@ -32,16 +33,13 @@ void keep_within_box(double* xA, double* yA) {
 }
 
 int read_doubles_from_file(int n, double* p, const char* fileName) {
-  /* Open input file and determine its size. */
   FILE* input_file = fopen(fileName, "rb");
   if(!input_file) {
     printf("read_doubles_from_file error: failed to open input file '%s'.\n", fileName);
     return -1;
   }
-  /* Get filesize using fseek() and ftell(). */
   fseek(input_file, 0L, SEEK_END);
   size_t fileSize = ftell(input_file);
-  /* Now use fseek() again to set file position back to beginning of the file. */
   fseek(input_file, 0L, SEEK_SET);
   if(fileSize != n * sizeof(double)) {
     printf("read_doubles_from_file error: size of input file '%s' does not match the given n.\n", fileName);
@@ -49,19 +47,17 @@ int read_doubles_from_file(int n, double* p, const char* fileName) {
 	   n, n * sizeof(double), fileSize);
     return -1;
   }
-  /* Read contents of input_file into buffer. */
+
   size_t noOfItemsRead = fread(p, sizeof(char), fileSize, input_file);
   if(noOfItemsRead != fileSize) {
     printf("read_doubles_from_file error: failed to read file contents into buffer.\n");
     return -1;
   }
-  /* OK, now we have the file contents in the buffer.
-     Since we are finished with the input file, we can close it now. */
+
   if(fclose(input_file) != 0) {
     printf("read_doubles_from_file error: error closing input file.\n");
     return -1;
   }
-  /* Return 0 to indicate success. */
   return 0;
 }
 
@@ -84,29 +80,45 @@ int write_doubles_to_file(int n, double* p, const char* fileName) {
     return 0;
 }
 
-void calculateParticleMotion(particle_t* particles, int N, int nsteps, float delta_t){
-    float G = -100/N;
-    double Gm, rij, rij_x, rij_y,factor, Fx, Fy, ax, ay;
-    for (int k = 0; k < nsteps; k++){
-        for (int i = 0; i < N; i++){
-            Gm = G * particles[i].m_diff;
-            Fx = 0,Fy = 0;
-            for (int j = 0; j < N; j++){
-                if (i==j) continue;
-                rij_x = particles[i].pos_dx - particles[j].pos_dx;
-                rij_y = particles[i].pos_dy - particles[j].pos_dy;
-                rij = sqrt(rij_x*rij_x + rij_y*rij_y) + epsilon;
-                factor = particles[j].m_diff/(rij*rij*rij);
-                Fx += rij_x*factor;
-                Fy += rij_y*factor;
-            }
-            ax = Fx*Gm/particles[i].m_diff;
-            ay = Fy*Gm/particles[i].m_diff;
-            particles[i].vel_dx += delta_t*ax;
-            particles[i].vel_dy += delta_t*ay;
-            particles[i].pos_dx += delta_t*particles[i].vel_dx;
-            particles[i].pos_dy += delta_t*particles[i].vel_dy;
+static double calculate_force_factor(
+    double pos_x_i, double pos_y_i,
+    double pos_x_j, double pos_y_j,
+    double mass_j
+) {
+    const double rij_x = pos_x_i - pos_x_j;
+    const double rij_y = pos_y_i - pos_y_j;
+    const double rij_squared = rij_x * rij_x + rij_y * rij_y;
+    const double rij = sqrt(rij_squared) + epsilon;
+    return mass_j / (rij * rij * rij);
+}
+
+void calculateParticleMotion(particle_t* particles, int N, float delta_t){
+    const float G = -100.0f/N;
+    double Fx, Fy;
+
+    for (int i = 0; i < N; i++){
+        const double pos_x_i = particles[i].pos_dx;
+        const double pos_y_i = particles[i].pos_dy;
+        Fx = 0;
+        Fy = 0;
+        for (int j = 0; j < N; j++){
+            if (i==j) continue;
+            const double factor = calculate_force_factor(
+                pos_x_i, pos_y_i,
+                particles[j].pos_dx, particles[j].pos_dy,
+                particles[j].m_diff
+            );
+
+            Fx += (pos_x_i - particles[j].pos_dx) * factor;
+            Fy += (pos_y_i - particles[j].pos_dy) * factor;
         }
+        particles[i].vel_dx += delta_t*Fx*G;
+        particles[i].vel_dy += delta_t*Fy*G;
+    }
+
+    for (int i = 0; i < N; i++){
+        particles[i].pos_dx += delta_t*particles[i].vel_dx;
+        particles[i].pos_dy += delta_t*particles[i].vel_dy;
     }
 }
 
@@ -148,26 +160,26 @@ int main(int argc, const char* argv[]) {
         InitializeGraphics((char*)argv[0],windowWidth,windowWidth);
         SetCAxes(0,1);
 
-        printf("Hit q to quit.\n");
-        while(!CheckForQuit()) {
+        for (int k = 0; k < nsteps; k++){
             /* Call graphics routines. */
             ClearScreen();
             for (size_t i = 0; i < N; i++){
                 DrawCircle(particles[i].pos_dx, particles[i].pos_dy, L, W, circleRadius, circleColor);
             }
             Refresh();
-            calculateParticleMotion(particles, N, nsteps, delta_t);
+            calculateParticleMotion(particles, N, delta_t);
             /* Sleep a short while to avoid screen flickering. */
             usleep(3000);
         }
         FlushDisplay();
         CloseDisplay();
     }
-    double startTime = get_wall_seconds();
-    calculateParticleMotion(particles, N, nsteps, delta_t);
-    double secondsTaken = get_wall_seconds() - startTime;
-    printf("secondsTaken = %f\n", secondsTaken);
-
+    else{
+        double startTime = get_wall_seconds();
+        calculateParticleMotion(particles, N, delta_t);
+        double secondsTaken = get_wall_seconds() - startTime;
+        printf("secondsTaken = %f\n", secondsTaken);
+    }
 
     for (size_t i = 0; i < N; i++){
         buffer[i*6+0] = particles[i].pos_dx;

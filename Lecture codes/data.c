@@ -18,22 +18,21 @@ void *work(void *arg)
 {
 	/* Local data only accessible to calling thread */
 	int sum=0;
-	
+
 	struct thread_arg *myarg=(struct thread_arg *) arg;
 	int tid=myarg->tid;
 	int *Gdata=myarg->data;
 	int t,i;
-	
+
+	pthread_mutex_lock (&order);
     /* Modify global data */
 	GlobData[tid]=-tid;
 	Gdata[tid]=tid;
-    
+
 	/* Compute a local sum */
 	for (i=0;i<NUM_THREADS; i++) sum=sum+GlobData[i];
-	
-		
+
 	/* Print data */
-	pthread_mutex_lock (&order);
 	printf("Thread %d, with sum %d\n",tid,sum);
 	printf("Thread %d, with GlobData: ",tid);
 	for (i=0;i<NUM_THREADS; i++) printf("%d ",GlobData[i]);
@@ -42,7 +41,7 @@ void *work(void *arg)
 	for (i=0;i<NUM_THREADS; i++) printf("%d ",Gdata[i]);
 	printf("\n\n");
 	pthread_mutex_unlock (&order);
-	
+
 	pthread_exit(NULL);
 }
 
@@ -50,12 +49,12 @@ int main(int argc, char *argv[])
 {
 	/* Global data but needs to be passed to the threads */
 	int *Data;
-	
+
 	struct thread_arg argarr[NUM_THREADS];
 	pthread_t threads[NUM_THREADS];
 	int	t;
 	pthread_mutex_init(&order, NULL);
-	
+
 	/* Initialize data */
 	Data=(int *)malloc(Nsize*sizeof(int));
 	printf("Master begin:\n");
@@ -63,15 +62,15 @@ int main(int argc, char *argv[])
 	  Data[t]=-1; GlobData[t]=1;
 	  printf("Data %d, GlobData %d\n",Data[t],GlobData[t]);}
 	printf("\n");
-	
+
 	/* Do something on the threads using global data*/
 	for(t=0;t<NUM_THREADS;t++){
 		argarr[t].tid=t; argarr[t].data=Data;
 		pthread_create(&threads[t], NULL, work, (void *)&argarr[t]);
-	}	
-	for(t=0; t<NUM_THREADS; t++) 
+	}
+	for(t=0; t<NUM_THREADS; t++)
 		pthread_join(threads[t], NULL);
-	
+
 	/* Print the result on master thread */
 	printf("Master end:\n");
 	for(t=0;t<Nsize;t++)

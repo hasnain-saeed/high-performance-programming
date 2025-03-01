@@ -15,7 +15,7 @@ void *findrank(void *arg)
 {
 	int rank,i;
 	long j=(long)arg;
-	
+
 	rank=0;
 	for (i=0;i<len;i++)
 		if (indata[i]<indata[j]) rank++;
@@ -25,16 +25,16 @@ void *findrank(void *arg)
 
 
 int main(int argc, char *argv[]) {
-	
+
   pthread_t threads[NUM_THREADS];
   pthread_attr_t attr;
   int seed,i,j,rank,nthreads,ttime,t;
   long el;
   void *status;
-  
+
   pthread_attr_init(&attr);
   pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-	
+
     // Generate random numbers
       for (i=0;i<len;i++){
           indata[i]=drand48();
@@ -50,8 +50,8 @@ int main(int argc, char *argv[]) {
 		for(t=0; t<NUM_THREADS; t++) {
 			el=j+t;
 		    pthread_create(&threads[t], &attr, findrank, (void *)el); }
-		
-		for(t=0; t<NUM_THREADS; t++) 
+
+		for(t=0; t<NUM_THREADS; t++)
 			pthread_join(threads[t], &status);
     }
   ttime=timer()-ttime;

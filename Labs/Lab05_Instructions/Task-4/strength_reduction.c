@@ -10,15 +10,15 @@ int main(int argc, char **argv)
 
    for (i=0; i<50000000; i++)
    {
-      c = d*2;
-      b = c*15;
-      a = b/16;
-      d = b/a;
+      c = d << 1;
+      b = (c << 4);
+      a = b >> 4;
+      d = b / a;
 
       z = 0.33;
-      y = 2*z;
-      x = y / 1.33;
-      z = x / 1.33;
+      y = 2.0f * z;
+      x = y / 1.33f;
+      z = x / 1.33f;
    }
    printf("%d %d %d %d, %f %f %f\n", a, b, c, d, x, y, z);
    return 0;

@@ -1,0 +1,225 @@
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-2$ ./threaddata
+This is the main() function starting.
+the main() function now calling pthread_create().
+This is the main() function after pthread_create()
+the main() function now calling pthread_join().
+5.700000
+9.200000
+1.600000
+-492507267327053735149061453844500142783598031181826005642646220088542589907629523429040100184643692658688.000000
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-2$ gcc -lpthread thread_data.c -o threaddata
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-2$ ./threaddata
+This is the main() function starting.
+the main() function now calling pthread_create().
+This is the main() function after pthread_create()
+the main() function now calling pthread_join().
+5.700000
+9.200000
+1.600000
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-2$ cd ../Task-3
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-3$ ls
+threaded_computation.c
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-3$ cd ../Task-2
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-2$ gcc -lpthread thread_data.c -o threaddata
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-2$ ./threaddata
+This is the main() function starting.
+the main() function now calling pthread_create().
+This is the main() function after pthread_create()
+the main() function now calling pthread_join().
+5.700000
+9.200000
+1.600000
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-2$ cd ../Task-3/
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-3$ gcc -lpthread threaded_computation.c -o threadcompute
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-3$ ./threadcompute
+This is the main() function starting.
+the main() function now calling pthread_create().
+This is the main() function after pthread_create()
+secondsTaken by the_thread_func= 0.318191
+secondsTaken by the main thread= 2.230664
+the main() function now calling pthread_join().
+sum computed by main() : 4900000000
+sum computed by thread : 700000000
+totalSum : 5600000000
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-3$ ./threadcompute
+This is the main() function starting.
+the main() function now calling pthread_create().
+This is the main() function after pthread_create()
+secondsTaken by the_thread_func= 0.318698
+secondsTaken by the main thread= 2.175165
+the main() function now calling pthread_join().
+sum computed by main() : 4900000000
+sum computed by thread : 700000000
+totalSum : 5600000000
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-3$ gcc -lpthread threaded_computation.c -o threadcompute
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-3$ ./threadcompute
+This is the main() function starting.
+the main() function now calling pthread_create().
+This is the main() function after pthread_create()
+secondsTaken by the_thread_func= 1.244974
+secondsTaken by the main thread= 1.246855
+the main() function now calling pthread_join().
+sum computed by main() : 2800000000
+sum computed by thread : 2800000000
+totalSum : 5600000000
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-3$ ./threadcompute
+This is the main() function starting.
+the main() function now calling pthread_create().
+This is the main() function after pthread_create()
+secondsTaken by the main thread= 1.247860
+the main() function now calling pthread_join().
+secondsTaken by the_thread_func= 1.272640
+sum computed by main() : 2800000000
+sum computed by thread : 2800000000
+totalSum : 5600000000
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-3$ gcc -lpthread threaded_computation.c -o threadcompute
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-3$ ./threadcompute
+This is the main() function starting.
+the main() function now calling pthread_create().
+This is the main() function after pthread_create()
+secondsTaken by the main thread= 3.135529
+the main() function now calling pthread_join().
+secondsTaken by the_thread_func= 21.651690
+sum computed by main() : 7000000000
+sum computed by thread : 49000000000
+totalSum : 56000000000
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-3$ gcc -lpthread threaded_computation.c -o threadcompute
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-3$ ./threadcompute
+This is the main() function starting.
+the main() function now calling pthread_create().
+This is the main() function after pthread_create()
+secondsTaken by the_thread_func= 12.372089
+secondsTaken by the main thread= 12.392678
+the main() function now calling pthread_join().
+sum computed by main() : 28000000000
+sum computed by thread : 28000000000
+totalSum : 56000000000
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-3$ gcc -lpthread threaded_computation.c -o threadcompute
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-3$ ./threadcompute
+This is the main() function starting.
+the main() function now calling pthread_create().
+This is the main() function after pthread_create()
+secondsTaken by the_thread_func= 12.366601
+secondsTaken by the main thread= 12.373187
+the main() function now calling pthread_join().
+sum computed by main() : 28000000000
+sum computed by thread : 28000000000
+totalSum : 56000000000
+total seconds taken the program overall 12.373327
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-3$ gcc -lpthread threaded_computation.c -o threadcompute
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-3$ ./threadcompute
+This is the main() function starting.
+the main() function now calling pthread_create().
+This is the main() function after pthread_create()
+secondsTaken by the main thread= 3.103068
+the main() function now calling pthread_join().
+secondsTaken by the_thread_func= 21.652024
+sum computed by main() : 7000000000
+sum computed by thread : 49000000000
+totalSum : 56000000000
+total seconds taken the program overall 21.652438
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-3$ cd ../Task-4
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-4$ gcc serial.c -o serial
+serial.c: In function ‘isPrime’:
+serial.c:8:26: warning: implicit declaration of function ‘sqrt’ [-Wimplicit-function-declaration]
+    8 |     for (int i = 1; i <= sqrt(n); i++) {
+      |                          ^~~~
+serial.c:3:1: note: include ‘<math.h>’ or provide a declaration of ‘sqrt’
+    2 | #include <stdlib.h>
+  +++ |+#include <math.h>
+    3 |
+serial.c:8:26: warning: incompatible implicit declaration of built-in function ‘sqrt’ [-Wbuiltin-declaration-mismatch]
+    8 |     for (int i = 1; i <= sqrt(n); i++) {
+      |                          ^~~~
+serial.c:8:26: note: include ‘<math.h>’ or provide a declaration of ‘sqrt’
+/usr/bin/ld: /tmp/ccD722RX.o: in function `isPrime':
+serial.c:(.text+0x63): undefined reference to `sqrt'
+collect2: error: ld returned 1 exit status
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-4$ make
+make: *** No targets specified and no makefile found.  Stop.
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-4$ gcc serial.c -o serial
+/usr/bin/ld: /tmp/ccaLNtAN.o: in function `isPrime':
+serial.c:(.text+0x63): undefined reference to `sqrt'
+collect2: error: ld returned 1 exit status
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-4$ gcc -lm serial.c -o serial
+/usr/bin/ld: /tmp/ccrh13AG.o: in function `isPrime':
+serial.c:(.text+0x63): undefined reference to `sqrt'
+collect2: error: ld returned 1 exit status
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-4$ gcc serial.c -lm -o serial
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-4$ ./serial
+Usage: ./serial M
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-4$ ./serial 100
+There are 36 prime numbers between 1 and 100.
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-4$ ./serial 100000
+There are 23392 prime numbers between 1 and 100000.
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-4$ ./serial 10000000
+^C
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-4$ gcc serial.c -lm -o serial
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-4$ ./serial 1000000
+secondsTaken by program= 13.171454
+There are 210060 prime numbers between 1 and 1000000.
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-4$ gcc parallel.c -lpthread -lm -o parallel
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-4$ ./parallel 1000000
+There are 210060 prime numbers between 1 and 1000000.
+secondsTaken by program= 8.406078
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-4$ cd ../Task-5
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-5$ gcc printthread.c -lpthread -o printthread
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-5$ ./printthread 10
+Hello from thread 0!
+Hello from thread 1!
+Hello from thread 3!
+Hello from thread 4!
+Hello from thread 2!
+Hello from thread 5!
+Hello from thread 6!
+Hello from thread 7!
+Hello from thread 8!
+Hello from thread 9!
+All threads have completed.
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-5$ ./printthread 5
+Hello from thread 0!
+Hello from thread 4!
+Hello from thread 1!
+Hello from thread 2!
+Hello from thread 3!
+All threads have completed.
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-5$ cd ../Task-6/
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-6$ gcc prime6.c -lm -lpthread -o prime
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-6$ ./prime
+Usage: ./prime M numThreads
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-6$ ./prime 1000000 2
+There are 210060 prime numbers between 1 and 1000000.
+Time taken: 8.409524 seconds
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-6$ ./prime 1000000 3
+There are 210060 prime numbers between 1 and 1000000.
+Time taken: 6.056788 seconds
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-6$ ./prime 1000000 4
+There are 210060 prime numbers between 1 and 1000000.
+Time taken: 4.582389 seconds
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-6$ ./prime 1000000 5
+There are 210060 prime numbers between 1 and 1000000.
+Time taken: 3.695300 seconds
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-6$ ./prime 1000000 6
+There are 210060 prime numbers between 1 and 1000000.
+Time taken: 3.142322 seconds
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-6$ lscpu | grep -E '^Thread|^Core|^Socket|^CPU\('
+CPU(s):                               16
+Thread(s) per core:                   2
+Core(s) per socket:                   4
+Socket(s):                            2
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-6$ ./prime 1000000 10
+There are 210060 prime numbers between 1 and 1000000.
+Time taken: 2.773510 seconds
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-6$ ./prime 1000000 16
+There are 210060 prime numbers between 1 and 1000000.
+Time taken: 3.271972 seconds
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-6$ ./prime 1000000 11
+There are 210060 prime numbers between 1 and 1000000.
+Time taken: 2.536593 seconds
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-6$ ./prime 1000000 12
+There are 210060 prime numbers between 1 and 1000000.
+Time taken: 2.754533 seconds
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-6$ ./prime 1000000 11
+There are 210060 prime numbers between 1 and 1000000.
+Time taken: 2.680747 seconds
+musa5441@fredholm:~/Lab08_Pthreads_I/Task-6$

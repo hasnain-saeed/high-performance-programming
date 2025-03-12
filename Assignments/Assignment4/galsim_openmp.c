@@ -1,10 +1,14 @@
-#include <sys/time.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
-typedef struct ParticleSystem {
+const double epsilon = 1e-3;
+
+typedef struct {
     double* pos_dx;
     double* pos_dy;
     double* m_diff;
@@ -16,50 +20,66 @@ typedef struct ParticleSystem {
     int n_particles;
 } particle_system_t;
 
-const double epsilon = 1e-3;
-
-void calculateParticleMotion(particle_system_t* system, double delta) {
+void process_galsim_omp(particle_system_t*system, int nsteps, double delta, int nthreads) {
     const int N = system->n_particles;
     const double Gdelta = -100.0 * delta / N;
+    double *tmp_fx = system->tmp_fx;
+    double *tmp_fy = system->tmp_fy;
 
-    memset(system->tmp_fx, 0.0, N*sizeof(double));
-    memset(system->tmp_fy, 0.0, N*sizeof(double));
+    #ifdef _OPENMP
+    omp_set_num_threads(nthreads);
+    #endif
 
-    for (int i = 0; i < N; i++){
-        const double pos_x_i = system->pos_dx[i];
-        const double pos_y_i = system->pos_dy[i];
-        const double m_i = system->m_diff[i];
-        double tmp_fx_i = 0.0;
-        double tmp_fy_i = 0.0;
-
-        #pragma GCC ivdep
-        for (int j = i + 1; j < N; j++) {
-            const double dx = pos_x_i - system->pos_dx[j];
-            const double dy = pos_y_i - system->pos_dy[j];
-            const double r2 = dx * dx + dy * dy;
-            const double denom = sqrt(r2) + epsilon;
-            const double d3 = denom * denom * denom;
-            const double inv_r3 = 1.0 / d3;
-            const double fx = dx * inv_r3;
-            const double fy = dy * inv_r3;
-            tmp_fx_i += system->m_diff[j] * fx;
-            tmp_fy_i += system->m_diff[j] * fy;
-            system->tmp_fx[j] -= m_i * fx;
-            system->tmp_fy[j] -= m_i * fy;
+    for (int step = 0; step < nsteps; step++) {
+        #ifdef _OPENMP
+        #pragma omp parallel for schedule(static)
+        #endif
+        for (int i=0; i<N; i++) {
+            tmp_fx[i] = 0.0;
+            tmp_fy[i] = 0.0;
         }
-        system->tmp_fx[i] += tmp_fx_i;
-        system->tmp_fy[i] += tmp_fy_i;
-    }
+        #ifdef _OPENMP
+        #pragma omp parallel for schedule(dynamic,8) reduction(+:tmp_fx[:N],tmp_fy[0:N])
+        #endif
+        for (int i=0; i<N; i++) {
+            const double pos_x_i = system->pos_dx[i];
+            const double pos_y_i = system->pos_dy[i];
+            const double m_i = system->m_diff[i];
+            double tmp_fx_i = 0.0;
+            double tmp_fy_i = 0.0;
+            #ifdef _OPENMP
+            #pragma omp simd
+            #endif
+            for (int j = i+1; j < N; j++) {
+                const double dx = pos_x_i - system->pos_dx[j];
+                const double dy = pos_y_i - system->pos_dy[j];
+                const double r2 = dx * dx + dy * dy;
+                const double denom = sqrt(r2) + epsilon;
+                const double d3 = denom * denom * denom;
+                const double inv_r3 = 1.0 / d3;
+                const double fx = dx * inv_r3;
+                const double fy = dy * inv_r3;
+                tmp_fx_i += system->m_diff[j] * fx;
+                tmp_fy_i += system->m_diff[j] * fy;
+                tmp_fx[j]-= m_i * fx;
+                tmp_fy[j]-= m_i * fy;
+            }
+            tmp_fx[i]+= tmp_fx_i;
+            tmp_fy[i]+= tmp_fy_i;
+        }
 
-    // update velocities and positions.
-    #pragma GCC ivdep
-    for (int i = 0; i < N; i++){
-        system->vel_dx[i] += Gdelta * system->tmp_fx[i];
-        system->vel_dy[i] += Gdelta * system->tmp_fy[i];
-        system->pos_dx[i] += delta * system->vel_dx[i];
-        system->pos_dy[i] += delta * system->vel_dy[i];
+        #ifdef _OPENMP
+        #pragma omp parallel for schedule(static)
+        #endif
+        for (int i=0; i<N; i++) {
+            system->vel_dx[i] += Gdelta * tmp_fx[i];
+            system->vel_dy[i] += Gdelta * tmp_fy[i];
+            system->pos_dx[i] += delta * system->vel_dx[i];
+            system->pos_dy[i] += delta * system->vel_dy[i];
+        }
     }
 }
+
 
 void create_particle_system(particle_system_t* system, int N) {
     system->n_particles = N;
@@ -85,16 +105,16 @@ void free_particle_system(particle_system_t* system) {
 }
 
 int main(int argc, const char* argv[]) {
-    if (argc != 6) {
-        printf("Usage: %s N filename nsteps delta_t graphics\n", argv[0]);
+    if (argc != 7) {
+        printf("Usage: %s N filename nsteps delta_t graphics nthreads\n", argv[0]);
         return -1;
     }
-
     const int N = atoi(argv[1]);
     const char* filename = argv[2];
     const int nsteps = atoi(argv[3]);
     const double delta = atof(argv[4]);
-    const char graphics = atoi(argv[5]);
+    const int graphics = atoi(argv[5]);
+    const int nthreads = atoi(argv[6]);
 
     FILE* file = fopen(filename, "rb");
     if (!file) {
@@ -122,10 +142,15 @@ int main(int argc, const char* argv[]) {
         system.vel_dy[i] = buffer[i*6+4];
         system.b_diff[i] = buffer[i*6+5];
     }
-    if (graphics == 0){
-        for (int k = 0; k < nsteps; k++) {
-            calculateParticleMotion(&system, delta);
-        }
+    if(graphics == 0){
+        #ifdef _OPENMP
+        double timer1=omp_get_wtime();
+        #endif
+        process_galsim_omp(&system, nsteps, delta, nthreads);
+        #ifdef _OPENMP
+        timer1 = omp_get_wtime() - timer1;
+        printf("Total time taken by threads: %lf\n", timer1);
+        #endif
     }
 
     for (int i = 0; i < N; i++) {

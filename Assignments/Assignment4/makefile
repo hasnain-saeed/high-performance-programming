@@ -1,13 +1,13 @@
-CC = gcc-12
-LD = gcc-12
+CC = gcc-13
+LD = gcc-13
 INCLUDES = -I/opt/X11/include
 LIBS = -L/opt/X11/lib -lX11 -lm
-CFLAGS = -O3 -ftree-vectorize -ffast-math -fopt-info-vec -Wall -Werror $(INCLUDES)
+CFLAGS = -O3 -march=native -ftree-vectorize -ffast-math -fopenmp -Wall -Werror $(INCLUDES)
 CFLAGS_DEBUG = -g $(INCLUDES)
 CFLAGS_PROFILE = -g -pg $(INCLUDES)
-LDFLAGS = $(LIBS)
+LDFLAGS = -fopenmp $(LIBS)
 RM = /bin/rm -f
-SOURCE=galsim_opt
+SOURCE=galsim_openmp
 OBJS = ${SOURCE}.o graphics/graphics.o
 EXECUTABLE = galsim
 

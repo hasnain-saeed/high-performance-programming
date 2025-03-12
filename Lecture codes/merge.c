@@ -10,73 +10,69 @@ typedef struct {
 
 typedef int intType;
 
-void*parallel_merge_sort(void* args) {
+#define MIN_SIZE_FOR_THREAD 1000  // threshold, adjust as necessary
+
+void* parallel_merge_sort(void* args) {
     ms_args *pargs = (ms_args*) args;
-    int*list_to_sort = pargs->list_to_sort;
+    int* list_to_sort = pargs->list_to_sort;
     int N = pargs->N;
 
-    if(N == 1) {
-      // Only one element, no sorting needed. Just return directly in this case.
-      return;
+    if (N <= 1) {
+        return NULL;  // Base case, no sorting needed
     }
+
     int n1 = N / 2;
     int n2 = N - n1;
-    // Allocate new lists
-    int* list1 = (int*)malloc(n1*sizeof(int));
-    int* list2 = (int*)malloc(n2*sizeof(int));
-    int i;
-    for(i = 0; i < n1; i++)
-      list1[i] = list_to_sort[i];
-    for(i = 0; i < n2; i++)
-      list2[i] = list_to_sort[n1+i];
 
-    ms_args left_args;
-    left_args.list_to_sort = list1;
-    left_args.N = n1;
+    int* list1 = (int*)malloc(n1 * sizeof(int));
+    int* list2 = (int*)malloc(n2 * sizeof(int));
 
-    ms_args *right_args = malloc(sizeof(ms_args));
-    right_args->list_to_sort = list2;
-    right_args->N = n2;
+    for(int i = 0; i < n1; i++)
+        list1[i] = list_to_sort[i];
+    for(int i = 0; i < n2; i++)
+        list2[i] = list_to_sort[n1 + i];
+
+    ms_args left_args = { .list_to_sort = list1, .N = n1 };
+    ms_args right_args = { .list_to_sort = list2, .N = n2 };
 
     pthread_t thread;
-    int rc = pthread_create(&thread, NULL, parallel_merge_sort, right_args);
-    if (rc) {
-        // if thread creation fails, do it in the same thread
-        parallel_merge_sort(right_args);
-        free(right_args);
-        // perform merge sort for the left side in the same thread
-        parallel_merge_sort(&left_args);
+    int thread_created = 0;
+
+    // Only create thread if array size is sufficiently large
+    if (N > MIN_SIZE_FOR_THREAD) {
+        if (pthread_create(&thread, NULL, parallel_merge_sort, &right_args) == 0) {
+            thread_created = 1;
+        } else {
+            parallel_merge_sort(&right_args);  // Thread creation failed, fallback
+        }
     } else {
-        // perform merge sort for the left side in the same thread
-        parallel_merge_sort(&left_args);
-        // wait for the other thread to finish
+        parallel_merge_sort(&right_args);  // Below threshold, no thread
+    }
+
+    // Always sort left half in the current thread
+    parallel_merge_sort(&left_args);
+
+    if (thread_created)
         pthread_join(thread, NULL);
-        free(right_args);
-    }
 
-    // Merge!
-    int i1 = 0;
-    int i2 = 0;
-    i = 0;
-    while(i1 < n1 && i2 < n2) {
-      if(list1[i1] < list2[i2]) {
-        list_to_sort[i] = list1[i1];
-        i1++;
-      }
-      else {
-        list_to_sort[i] = list2[i2];
-        i2++;
-      }
-      i++;
+    // Merge sorted halves
+    int i = 0, i1 = 0, i2 = 0;
+    while (i1 < n1 && i2 < n2) {
+        if (list1[i1] < list2[i2]) {
+            list_to_sort[i++] = list1[i1++];
+        } else {
+            list_to_sort[i++] = list2[i2++];
+        }
     }
-
-    while(i1 < n1)
-      list_to_sort[i++] = list1[i1++];
-    while(i2 < n2)
-      list_to_sort[i++] = list2[i2++];
+    while (i1 < n1)
+        list_to_sort[i++] = list1[i1++];
+    while (i2 < n2)
+        list_to_sort[i++] = list2[i2++];
 
     free(list1);
     free(list2);
+
+    return NULL;
 }
 
 

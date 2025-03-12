@@ -1,14 +1,13 @@
 CC = gcc
 LD = gcc
-INCLUDES = -I/opt/X11/include
-LIBS = -L/opt/X11/lib -lX11 -lm
-CFLAGS = -O3 -march=native -ffast-math -Wall -Werror $(INCLUDES)
-CFLAGS_DEBUG = -g $(INCLUDES)
-CFLAGS_PROFILE = -g -pg $(INCLUDES)
+LIBS = -lm
+CFLAGS = -O3 -march=native -ffast-math -Wall -Werror
+CFLAGS_DEBUG = -g
+CFLAGS_PROFILE = -g -pg
 LDFLAGS = $(LIBS)
 RM = /bin/rm -f
 SOURCE=galsim_opt
-OBJS = ${SOURCE}.o graphics/graphics.o
+OBJS = ${SOURCE}.o
 EXECUTABLE = galsim
 
 all: $(EXECUTABLE)
@@ -28,9 +27,6 @@ $(EXECUTABLE)_profile: $(OBJS)
 
 ${SOURCE}.o: ${SOURCE}.c
 	$(CC) $(CFLAGS) -c ${SOURCE}.c
-
-graphics/graphics.o: graphics/graphics.c
-	$(CC) $(CFLAGS) -c graphics/graphics.c -o graphics/graphics.o
 
 clean:
 	$(RM) $(EXECUTABLE) $(EXECUTABLE)_debug $(EXECUTABLE)_profile $(OBJS)
